@@ -212,36 +212,6 @@ int main(int argc, char* argv[])
 				verVec[i][j] = getVerticalSeamEnergy(energyVec, verVec, j, i);
 		//find the path of the minimum seam
 		path = findVerticalPath(verVec);
-
-
-
-		//output bullshit
-		//std::cout << "\n----\n";
-		//for (int i = 0; i < y; i++) {
-		//	for (int j = 0; j < x; j++)
-		//		std::cout << pgmVec[i][j] << " ";
-		//	std::cout << "\n\n";
-		//}
-		//std::cout << "----\n";
-		//for (int i = 0; i < y; i++) {
-		//	for (int j = 0; j < x; j++)
-		//		std::cout << energyVec[i][j] << " ";
-		//	std::cout << "\n\n";
-		//}
-		//std::cout << "----\n";
-		//for (int i = 0; i < y; i++) {
-		//	for (int j = 0; j < x; j++)
-		//		std::cout << verVec[i][j] << " ";
-		//	std::cout << "\n\n";
-		//}
-		//std::cout << "----\n";
-		//for (int i = 0; i < y; i++) {
-		//	std::cout << path[i] << " ";
-		//}
-		////////////////////////////////////////////////
-
-
-
 		//delete the seam
 		for (int i = 0; i < y; i++)
 			pgmVec[y - 1 - i].erase(pgmVec[y - 1 - i].begin() + path[i]);
@@ -279,36 +249,6 @@ int main(int argc, char* argv[])
 				horVec[j][i] = getHorizontalSeamEnergy(energyVec, horVec, i, j);
 		//find the path of the minimum seam
 		path = findHorizontalPath(horVec);
-
-
-
-		//output bullshit
-		//std::cout << "\n----\n";
-		//for (int i = 0; i < y; i++) {
-		//	for (int j = 0; j < x; j++)
-		//		std::cout << pgmVec[i][j] << " ";
-		//	std::cout << "\n\n";
-		//}
-		//std::cout << "----\n";
-		//for (int i = 0; i < y; i++) {
-		//	for (int j = 0; j < x; j++)
-		//		std::cout << energyVec[i][j] << " ";
-		//	std::cout << "\n\n";
-		//}
-		//std::cout << "----\n";
-		//for (int i = 0; i < y; i++) {
-		//	for (int j = 0; j < x; j++)
-		//		std::cout << horVec[i][j] << " ";
-		//	std::cout << "\n\n";
-		//}
-		//std::cout << "----\n";
-		//for (int i = 0; i < x; i++) {
-		//	std::cout << path[i] << " ";
-		//}
-		////////////////////////////////////////////////
-
-
-
 		//delete the seam
 		for (int i = 0; i < x; i++) {
 			for (int j = path[i]; j < y; j++) {
