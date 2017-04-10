@@ -5,20 +5,22 @@
 #include <vector>
 #include <algorithm>
 
-int getSeamEnergy(const std::vector<std::vector<int>>& vec, const int& x, const int& y, const int& maxSize) {
-	if (y < 0)
-		return 0;
-	//not an edge case
-	if (x > 0 && x < maxSize - 1) {
-		return vec[y][x] + std::min(std::min(getSeamEnergy(vec, x - 1, y - 1, maxSize), getSeamEnergy(vec, x, y - 1, maxSize)), getSeamEnergy(vec, x + 1, y - 1, maxSize));
-	}
-	//edge case
-	if (x == 0) {
-		return vec[y][x] + std::min(getSeamEnergy(vec, x, y - 1, maxSize), getSeamEnergy(vec, x + 1, y - 1, maxSize));
-	}
-	//edge case
-	if (x == maxSize - 1) {
-		return vec[y][x] + std::min(getSeamEnergy(vec, x - 1, y - 1, maxSize), getSeamEnergy(vec, x, y - 1, maxSize));
+int getSeamEnergy(const std::vector<std::vector<int>>& vec, const std::vector<std::vector<int>>& vec2, const int& x, const int& y) {
+	if (y == 0)
+		return vec[y][x];
+	else {
+		//not an edge case
+		if (x > 0 && x < vec[0].size() - 1) {
+			return vec[y][x] + std::min(std::min(vec2[y - 1][x - 1], vec2[y - 1][x]), vec2[y - 1][x + 1]);
+		}
+		//edge case
+		if (x == 0) {
+			return vec[y][x] + std::min(vec2[y - 1][x], vec2[y - 1][x + 1]);
+		}
+		//edge case
+		if (x == vec[0].size() - 1) {
+			return vec[y][x] + std::min(vec2[y - 1][x - 1], vec2[y - 1][x]);
+		}
 	}
 }
 
@@ -83,10 +85,12 @@ std::vector<std::string> stringsplit(const std::string& s, const std::string& de
 
 int main(int argc, char* argv[])
 {
+	int verCuts = 20;
+	int attempts = 0;
 	//read image file
 	std::string str, input;
 	std::ifstream file;
-	file.open("Images\\test.pgm");
+	file.open("Images\\bug.pgm");
 	//skip the first two lines
 	std::getline(file, input);
 	std::getline(file, input);
@@ -102,9 +106,11 @@ int main(int argc, char* argv[])
 	std::vector<std::vector<int>> pgmVec(y, std::vector<int>(x));
 	//vector with pixel energy data
 	std::vector<std::vector<int>> energyVec(y, std::vector<int>(x));
-	//vector with seam indices
+	//vector with cumulative seam energy
 	std::vector<std::vector<int>> verVec(y, std::vector<int>(x));
 	std::vector<std::vector<int>> horVec(y, std::vector<int>(x));
+	//vector for path of seam
+	std::vector<int> path;
 	//get the max greyscale value
 	std::getline(file, input);
 	int maxVal = std::stoi(input);
@@ -120,77 +126,88 @@ int main(int argc, char* argv[])
 			pgmVec[i][j] = std::stoi(vec[(i * x) + j]);
 
 //delete a vertical seam
-	//calculate the energy of all pixels
-	int sum = 0;
-	for (int i = 0; i < y; i++) {
-		for (int j = 0; j < x; j++) {
-			if (i > 0)
-				sum += abs(pgmVec[i][j] - pgmVec[i - 1][j]);
-			if (i < y - 1)
-				sum += abs(pgmVec[i][j] - pgmVec[i + 1][j]);
-			if (j > 0)
-				sum += abs(pgmVec[i][j] - pgmVec[i][j - 1]);
-			if (j < x - 1)
-				sum += abs(pgmVec[i][j] - pgmVec[i][j + 1]);
-			energyVec[i][j] = sum;
-			sum = 0;
+	do {
+		path.clear();
+		//calculate the energy of all pixels
+		int sum = 0;
+		for (int i = 0; i < y; i++) {
+			for (int j = 0; j < x; j++) {
+				if (i > 0)
+					sum += abs(pgmVec[i][j] - pgmVec[i - 1][j]);
+				if (i < y - 1)
+					sum += abs(pgmVec[i][j] - pgmVec[i + 1][j]);
+				if (j > 0)
+					sum += abs(pgmVec[i][j] - pgmVec[i][j - 1]);
+				if (j < x - 1)
+					sum += abs(pgmVec[i][j] - pgmVec[i][j + 1]);
+				energyVec[i][j] = sum;
+				sum = 0;
+			}
 		}
-	}
-	int max = 0;
-	for (int i = 0; i < energyVec.size(); i++)
-		for (int j = 0; j < energyVec[0].size(); j++)
-		if (energyVec[i][j] > max)
-			max = energyVec[i][j];
-	//find the cumulative energy seams
-	for (int i = 0; i < y; i++)
-		for (int j = 0; j < x; j++)
-			verVec[i][j] = getSeamEnergy(energyVec, j, i, x);
-	//find the path of the minimum seam
-	std::vector<int> path = findPath(verVec);
+		//find the cumulative energy seams
+		for (int i = 0; i < y; i++)
+			for (int j = 0; j < x; j++)
+				verVec[i][j] = getSeamEnergy(energyVec, verVec, j, i);
+		//find the path of the minimum seam
+		path = findPath(verVec);
 
 
 
-	//output bullshit
-	std::cout << "\n----\n";
-	for (int i = 0; i < y; i++) {
-		for (int j = 0; j < x; j++)
-			std::cout << pgmVec[i][j] << " ";
-		std::cout << "\n\n";
-	}
-	std::cout << "----\n";
-	for (int i = 0; i < y; i++) {
-		for (int j = 0; j < x; j++)
-			std::cout << energyVec[i][j] << " ";
-		std::cout << "\n\n";
-	}
-	std::cout << "----\n";
-	for (int i = 0; i < y; i++) {
-		for (int j = 0; j < x; j++)
-			std::cout << verVec[i][j] << " ";
-		std::cout << "\n\n";
-	}
-	std::cout << "----\n";
-	for (int i = 0; i < y; i++) {
-		std::cout << path[i] << " ";
-	}
-	////////////////////////////////////////////////
+		//output bullshit
+		std::cout << "\n----\n";
+		for (int i = 0; i < y; i++) {
+			for (int j = 0; j < x; j++)
+				std::cout << pgmVec[i][j] << " ";
+			std::cout << "\n\n";
+		}
+		std::cout << "----\n";
+		for (int i = 0; i < y; i++) {
+			for (int j = 0; j < x; j++)
+				std::cout << energyVec[i][j] << " ";
+			std::cout << "\n\n";
+		}
+		std::cout << "----\n";
+		for (int i = 0; i < y; i++) {
+			for (int j = 0; j < x; j++)
+				std::cout << verVec[i][j] << " ";
+			std::cout << "\n\n";
+		}
+		std::cout << "----\n";
+		for (int i = 0; i < y; i++) {
+			std::cout << path[i] << " ";
+		}
+		////////////////////////////////////////////////
 
 
 
-	//delete the seam
-	for (int i = 0; i < y; i++)
-		pgmVec[y - 1 - i].erase(pgmVec[y - 1 - i].begin() + path[i]);
-	//shrink the size
-	//y = y - 1;
+		//delete the seam
+		for (int i = 0; i < y; i++)
+			pgmVec[y - 1 - i].erase(pgmVec[y - 1 - i].begin() + path[i]);
+		for (int i = 0; i < y; i++)
+			energyVec[y - 1 - i].erase(energyVec[y - 1 - i].begin() + path[i]);
+		for (int i = 0; i < y; i++)
+			verVec[y - 1 - i].erase(verVec[y - 1 - i].begin() + path[i]);
+		attempts++;
+		x--;
+	} while (attempts < verCuts);
 //loop again
 
 //delete a horizontal seam
+
+
+
+
+
+
+
+
+	//output to file
 	std::ofstream fileOut;
-	fileOut.open("energy.pgm");
+	fileOut.open("pgm.pgm");
 	fileOut << "P2\n";
 	fileOut << "#...\n";
 	fileOut << pgmVec[0].size() << " " << pgmVec.size() << "\n";
-	fileOut << max << "\n";
+	fileOut << maxVal << "\n";
 	for (int i = 0; i < pgmVec.size(); i++) {
 		for (int j = 0; j < pgmVec[0].size(); j++)
 			fileOut << pgmVec[i][j] << " ";
