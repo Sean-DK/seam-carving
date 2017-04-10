@@ -145,14 +145,16 @@ std::vector<std::string> stringsplit(const std::string& s, const std::string& de
 
 int main(int argc, char* argv[])
 {
-	int verCuts = 0;
+	int verCuts = atoi(argv[2]);
 	int verAttempts = 0;
-	int horCuts = 116;
+	int horCuts = atoi(argv[3]);
 	int horAttempts = 0;
 	//read image file
-	std::string str, input;
+	std::string str, input, filename;
 	std::ifstream file;
-	file.open("Images\\twoBalls.pgm");
+	filename = "Images\\";
+	filename += argv[1];
+	file.open(filename);
 	//skip the first two lines
 	std::getline(file, input);
 	std::getline(file, input);
@@ -252,74 +254,22 @@ int main(int argc, char* argv[])
 		//find the path of the minimum seam
 		path = findHorizontalPath(horVec);
 		std::reverse(path.begin(), path.end());
-
-		//output bullshit
-				/*std::cout << "\n----\n";
-					for (int i = 0; i < y; i++) {
-						for (int j = 0; j < x; j++)
-							std::cout << pgmVec[i][j] << " ";
-						std::cout << "\n\n";
-					}
-					std::cout << "----\n";
-					for (int i = 0; i < y; i++) {
-						for (int j = 0; j < x; j++)
-							std::cout << energyVec[i][j] << " ";
-						std::cout << "\n\n";
-					}
-					std::cout << "----\n";
-					for (int i = 0; i < y; i++) {
-						for (int j = 0; j < x; j++)
-							std::cout << horVec[i][j] << " ";
-						std::cout << "\n\n";
-					}
-					std::cout << "----\n";
-					for (int i = 0; i < x; i++) {
-						std::cout << path[i] << " ";
-					}*/
-					////////////////////////////////////////////////
-
-
-
 		//delete the seam
 		for (int i = 0; i < x; i++) {
 			for (int j = path[i]; j < y - 1; j++) {
-				/*if (j == y - 1) {
-					pgmVec[j].erase(pgmVec[j].begin());
-				}
-				else if (j == y - 2) {
-					pgmVec[j][i] = pgmVec[y - 1][i];
-				}
-				else {*/
-					pgmVec[j][i] = pgmVec[j + 1][i];
-				//}			
+					pgmVec[j][i] = pgmVec[j + 1][i];	
 			}
 		}
 		pgmVec.erase(pgmVec.begin() + y - 1);
 		for (int i = 0; i < x; i++) {
 			for (int j = path[i]; j < y - 1; j++) {
-				/*if (j == y - 1) {
-					energyVec[j].erase(energyVec[j].begin());
-				}
-				else if (j == y - 2) {
-					energyVec[j][i] = energyVec[y - 1][0];
-				}
-				else {*/
 					energyVec[j][i] = energyVec[j + 1][i];
-				//}
 			}
 		}
 		energyVec.erase(energyVec.begin() + y - 1);
 		for (int i = 0; i < x; i++) {
 			for (int j = path[i]; j < y - 1; j++) {
-				/*if (j == y - 1) {
-					horVec[j].erase(horVec[j].begin());
-				}
-				else if (j == y - 2) {
-					horVec[j][i] = horVec[y - 1][0];
-				}
-				else {*/
 					horVec[j][i] = horVec[j + 1][i];
-				//}
 			}
 		}
 		horVec.erase(horVec.begin() + y - 1);
@@ -327,15 +277,11 @@ int main(int argc, char* argv[])
 		y--;
 	}
 //loop again
-
-
-
-
-
-
 	//output to file
 	std::ofstream fileOut;
-	fileOut.open("pgm.pgm");
+	filename.erase(filename.end() - 4, filename.end());
+	filename += "_processed.pgm";
+	fileOut.open(filename);
 	fileOut << "P2\n";
 	fileOut << "#...\n";
 	fileOut << pgmVec[0].size() << " " << pgmVec.size() << "\n";
