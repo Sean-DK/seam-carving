@@ -5,7 +5,7 @@
 #include <vector>
 #include <algorithm>
 
-int getSeamEnergy(const std::vector<std::vector<int>>& vec, const std::vector<std::vector<int>>& vec2, const int& x, const int& y) {
+int getVerticalSeamEnergy(const std::vector<std::vector<int>>& vec, const std::vector<std::vector<int>>& vec2, const int& x, const int& y) {
 	if (y == 0)
 		return vec[y][x];
 	else {
@@ -24,7 +24,26 @@ int getSeamEnergy(const std::vector<std::vector<int>>& vec, const std::vector<st
 	}
 }
 
-std::vector<int> findPath(std::vector<std::vector<int>> vec) {
+int getHorizontalSeamEnergy(const std::vector<std::vector<int>>& vec, const std::vector<std::vector<int>>& vec2, const int& x, const int& y) {
+	if (x == 0)
+		return vec[y][x];
+	else {
+		//not an edge case
+		if (y > 0 && y < vec.size() - 1) {
+			return vec[y][x] + std::min(std::min(vec2[y - 1][x - 1], vec2[y][x - 1]), vec2[y + 1][x - 1]);
+		}
+		//edge case
+		if (y == 0) {
+			return vec[y][x] + std::min(vec2[y][x - 1], vec2[y + 1][x - 1]);
+		}
+		//edge case
+		if (y == vec.size() - 1) {
+			return vec[y][x] + std::min(vec2[y - 1][x - 1], vec2[y][x - 1]);
+		}
+	}
+}
+
+std::vector<int> findVerticalPath(std::vector<std::vector<int>> vec) {
 	std::vector<int> path;
 	int y = vec.size();
 	int x = vec[y - 1].size();
@@ -65,6 +84,47 @@ std::vector<int> findPath(std::vector<std::vector<int>> vec) {
 	return path;
 }
 
+std::vector<int> findHorizontalPath(std::vector<std::vector<int>> vec) {
+	std::vector<int> path;
+	int y = vec.size();
+	int x = 0;
+	int minValue = 9999999;
+	int minIndex = -1;
+	int prevIndex = -1;
+	for (int i = 0; i < y; i++)
+		if (vec[i][x] < minValue) {
+			minValue = vec[i][x];
+			minIndex = i;
+		}
+	path.push_back(minIndex);
+	prevIndex = minIndex;
+	x++;
+	do {
+		minValue = 9999999;
+		//check y - 1, x - 1
+		if (prevIndex - 1 >= 0)
+			if (vec[prevIndex - 1][x - 1] < minValue) {
+				minValue = vec[prevIndex - 1][x - 1];
+				minIndex = prevIndex - 1;
+			}
+		//check y, x - 1
+		if (vec[prevIndex][x - 1] < minValue) {
+			minValue = vec[prevIndex][x - 1];
+			minIndex = prevIndex;
+		}
+		//check y + 1, x - 1
+		if (prevIndex + 1 < x)
+			if (vec[prevIndex + 1][x - 1] < minValue) {
+				minValue = vec[prevIndex + 1][x - 1];
+				minIndex = prevIndex + 1;
+			}
+		path.push_back(minIndex);
+		prevIndex = minIndex;
+		x++;
+	} while (x < vec[0].size());
+	return path;
+}
+
 //split a string with a specified delimiter and return a vector of all substrings
 std::vector<std::string> stringsplit(const std::string& s, const std::string& delim) {
 	std::vector<std::string> result; //create a vector to be returned
@@ -86,7 +146,9 @@ std::vector<std::string> stringsplit(const std::string& s, const std::string& de
 int main(int argc, char* argv[])
 {
 	int verCuts = 20;
-	int attempts = 0;
+	int verAttempts = 0;
+	int horCuts = 15;
+	int horAttempts = 0;
 	//read image file
 	std::string str, input;
 	std::ifstream file;
@@ -126,7 +188,7 @@ int main(int argc, char* argv[])
 			pgmVec[i][j] = std::stoi(vec[(i * x) + j]);
 
 //delete a vertical seam
-	do {
+	while (verAttempts < verCuts) {
 		path.clear();
 		//calculate the energy of all pixels
 		int sum = 0;
@@ -147,35 +209,35 @@ int main(int argc, char* argv[])
 		//find the cumulative energy seams
 		for (int i = 0; i < y; i++)
 			for (int j = 0; j < x; j++)
-				verVec[i][j] = getSeamEnergy(energyVec, verVec, j, i);
+				verVec[i][j] = getVerticalSeamEnergy(energyVec, verVec, j, i);
 		//find the path of the minimum seam
-		path = findPath(verVec);
+		path = findVerticalPath(verVec);
 
 
 
 		//output bullshit
-		std::cout << "\n----\n";
-		for (int i = 0; i < y; i++) {
-			for (int j = 0; j < x; j++)
-				std::cout << pgmVec[i][j] << " ";
-			std::cout << "\n\n";
-		}
-		std::cout << "----\n";
-		for (int i = 0; i < y; i++) {
-			for (int j = 0; j < x; j++)
-				std::cout << energyVec[i][j] << " ";
-			std::cout << "\n\n";
-		}
-		std::cout << "----\n";
-		for (int i = 0; i < y; i++) {
-			for (int j = 0; j < x; j++)
-				std::cout << verVec[i][j] << " ";
-			std::cout << "\n\n";
-		}
-		std::cout << "----\n";
-		for (int i = 0; i < y; i++) {
-			std::cout << path[i] << " ";
-		}
+		//std::cout << "\n----\n";
+		//for (int i = 0; i < y; i++) {
+		//	for (int j = 0; j < x; j++)
+		//		std::cout << pgmVec[i][j] << " ";
+		//	std::cout << "\n\n";
+		//}
+		//std::cout << "----\n";
+		//for (int i = 0; i < y; i++) {
+		//	for (int j = 0; j < x; j++)
+		//		std::cout << energyVec[i][j] << " ";
+		//	std::cout << "\n\n";
+		//}
+		//std::cout << "----\n";
+		//for (int i = 0; i < y; i++) {
+		//	for (int j = 0; j < x; j++)
+		//		std::cout << verVec[i][j] << " ";
+		//	std::cout << "\n\n";
+		//}
+		//std::cout << "----\n";
+		//for (int i = 0; i < y; i++) {
+		//	std::cout << path[i] << " ";
+		//}
 		////////////////////////////////////////////////
 
 
@@ -187,14 +249,113 @@ int main(int argc, char* argv[])
 			energyVec[y - 1 - i].erase(energyVec[y - 1 - i].begin() + path[i]);
 		for (int i = 0; i < y; i++)
 			verVec[y - 1 - i].erase(verVec[y - 1 - i].begin() + path[i]);
-		attempts++;
+		verAttempts++;
 		x--;
-	} while (attempts < verCuts);
+	}
 //loop again
 
 //delete a horizontal seam
+	while (horAttempts < horCuts) {
+		path.clear();
+		//calculate the energy of all pixels
+		int sum = 0;
+		for (int i = 0; i < y; i++) {
+			for (int j = 0; j < x; j++) {
+				if (i > 0)
+					sum += abs(pgmVec[i][j] - pgmVec[i - 1][j]);
+				if (i < y - 1)
+					sum += abs(pgmVec[i][j] - pgmVec[i + 1][j]);
+				if (j > 0)
+					sum += abs(pgmVec[i][j] - pgmVec[i][j - 1]);
+				if (j < x - 1)
+					sum += abs(pgmVec[i][j] - pgmVec[i][j + 1]);
+				energyVec[i][j] = sum;
+				sum = 0;
+			}
+		}
+		//find the cumulative energy seams
+		for (int i = 0; i < x; i++)
+			for (int j = 0; j < y; j++)
+				horVec[j][i] = getHorizontalSeamEnergy(energyVec, horVec, i, j);
+		//find the path of the minimum seam
+		path = findHorizontalPath(horVec);
 
 
+
+		//output bullshit
+		//std::cout << "\n----\n";
+		//for (int i = 0; i < y; i++) {
+		//	for (int j = 0; j < x; j++)
+		//		std::cout << pgmVec[i][j] << " ";
+		//	std::cout << "\n\n";
+		//}
+		//std::cout << "----\n";
+		//for (int i = 0; i < y; i++) {
+		//	for (int j = 0; j < x; j++)
+		//		std::cout << energyVec[i][j] << " ";
+		//	std::cout << "\n\n";
+		//}
+		//std::cout << "----\n";
+		//for (int i = 0; i < y; i++) {
+		//	for (int j = 0; j < x; j++)
+		//		std::cout << horVec[i][j] << " ";
+		//	std::cout << "\n\n";
+		//}
+		//std::cout << "----\n";
+		//for (int i = 0; i < x; i++) {
+		//	std::cout << path[i] << " ";
+		//}
+		////////////////////////////////////////////////
+
+
+
+		//delete the seam
+		for (int i = 0; i < x; i++) {
+			for (int j = path[i]; j < y; j++) {
+				if (j == y - 1) {
+					pgmVec[j].erase(pgmVec[j].begin());
+				}
+				else if (j == y - 2) {
+					pgmVec[j][i] = pgmVec[y - 1][0];
+				}
+				else {
+					pgmVec[j][i] = pgmVec[j + 1][i];
+				}			
+			}
+		}
+		pgmVec.erase(pgmVec.begin() + y - 1);
+		for (int i = 0; i < x; i++) {
+			for (int j = path[i]; j < y; j++) {
+				if (j == y - 1) {
+					energyVec[j].erase(energyVec[j].begin());
+				}
+				else if (j == y - 2) {
+					energyVec[j][i] = energyVec[y - 1][0];
+				}
+				else {
+					energyVec[j][i] = energyVec[j + 1][i];
+				}
+			}
+		}
+		energyVec.erase(energyVec.begin() + y - 1);
+		for (int i = 0; i < x; i++) {
+			for (int j = path[i]; j < y; j++) {
+				if (j == y - 1) {
+					horVec[j].erase(horVec[j].begin());
+				}
+				else if (j == y - 2) {
+					horVec[j][i] = horVec[y - 1][0];
+				}
+				else {
+					horVec[j][i] = horVec[j + 1][i];
+				}
+			}
+		}
+		horVec.erase(horVec.begin() + y - 1);
+		horAttempts++;
+		y--;
+	}
+//loop again
 
 
 
@@ -216,23 +377,3 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-
-/*
-//output the vector
-for (int i = 0; i < y; i++) {
-	for (int j = 0; j < x; j++)
-		std::cout << pgmVec[i][j] << " ";
-	std::cout << "\n";
-}
-*/
-
-/*
-int getSeamEnergy2(const std::vector<std::vector<int>>& vec, const int& x, const int& y, const int& maxSize) {
-int result;
-do {
-if (y < 0)
-return result;
-
-}
-}
-*/

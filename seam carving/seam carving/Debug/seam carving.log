@@ -1,7 +1,10 @@
 ﻿  seam carving.cpp
 e:\users\sean\documents\visual studio 2015\projects\seam carving\seam carving\seam carving.cpp(13): warning C4018: '<': signed/unsigned mismatch
-e:\users\sean\documents\visual studio 2015\projects\seam carving\seam carving\seam carving.cpp(211): warning C4018: '<': signed/unsigned mismatch
-e:\users\sean\documents\visual studio 2015\projects\seam carving\seam carving\seam carving.cpp(212): warning C4018: '<': signed/unsigned mismatch
-e:\users\sean\documents\visual studio 2015\projects\seam carving\seam carving\seam carving.cpp(25): warning C4715: 'getSeamEnergy': not all control paths return a value
+e:\users\sean\documents\visual studio 2015\projects\seam carving\seam carving\seam carving.cpp(32): warning C4018: '<': signed/unsigned mismatch
+e:\users\sean\documents\visual studio 2015\projects\seam carving\seam carving\seam carving.cpp(124): warning C4018: '<': signed/unsigned mismatch
+e:\users\sean\documents\visual studio 2015\projects\seam carving\seam carving\seam carving.cpp(372): warning C4018: '<': signed/unsigned mismatch
+e:\users\sean\documents\visual studio 2015\projects\seam carving\seam carving\seam carving.cpp(373): warning C4018: '<': signed/unsigned mismatch
+e:\users\sean\documents\visual studio 2015\projects\seam carving\seam carving\seam carving.cpp(25): warning C4715: 'getVerticalSeamEnergy': not all control paths return a value
+e:\users\sean\documents\visual studio 2015\projects\seam carving\seam carving\seam carving.cpp(44): warning C4715: 'getHorizontalSeamEnergy': not all control paths return a value
   seam carving.vcxproj -> E:\Users\Sean\Documents\Visual Studio 2015\Projects\seam carving\Debug\seam carving.exe
   seam carving.vcxproj -> E:\Users\Sean\Documents\Visual Studio 2015\Projects\seam carving\Debug\seam carving.pdb (Full PDB)
