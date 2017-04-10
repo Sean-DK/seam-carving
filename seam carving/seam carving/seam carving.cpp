@@ -87,18 +87,18 @@ std::vector<int> findVerticalPath(std::vector<std::vector<int>> vec) {
 std::vector<int> findHorizontalPath(std::vector<std::vector<int>> vec) {
 	std::vector<int> path;
 	int y = vec.size();
-	int x = 0;
+	int x = vec[0].size();
 	int minValue = 9999999;
 	int minIndex = -1;
 	int prevIndex = -1;
 	for (int i = 0; i < y; i++)
-		if (vec[i][x] < minValue) {
-			minValue = vec[i][x];
+		if (vec[i][x - 1] < minValue) {
+			minValue = vec[i][x - 1];
 			minIndex = i;
 		}
 	path.push_back(minIndex);
 	prevIndex = minIndex;
-	x++;
+	x--;
 	do {
 		minValue = 9999999;
 		//check y - 1, x - 1
@@ -113,15 +113,15 @@ std::vector<int> findHorizontalPath(std::vector<std::vector<int>> vec) {
 			minIndex = prevIndex;
 		}
 		//check y + 1, x - 1
-		if (prevIndex + 1 < x)
+		if (prevIndex + 1 < y)
 			if (vec[prevIndex + 1][x - 1] < minValue) {
 				minValue = vec[prevIndex + 1][x - 1];
 				minIndex = prevIndex + 1;
 			}
 		path.push_back(minIndex);
 		prevIndex = minIndex;
-		x++;
-	} while (x < vec[0].size());
+		x--;
+	} while (x > 0);
 	return path;
 }
 
@@ -145,14 +145,14 @@ std::vector<std::string> stringsplit(const std::string& s, const std::string& de
 
 int main(int argc, char* argv[])
 {
-	int verCuts = 20;
+	int verCuts = 0;
 	int verAttempts = 0;
-	int horCuts = 15;
+	int horCuts = 116;
 	int horAttempts = 0;
 	//read image file
 	std::string str, input;
 	std::ifstream file;
-	file.open("Images\\bug.pgm");
+	file.open("Images\\twoBalls.pgm");
 	//skip the first two lines
 	std::getline(file, input);
 	std::getline(file, input);
@@ -219,6 +219,8 @@ int main(int argc, char* argv[])
 			energyVec[y - 1 - i].erase(energyVec[y - 1 - i].begin() + path[i]);
 		for (int i = 0; i < y; i++)
 			verVec[y - 1 - i].erase(verVec[y - 1 - i].begin() + path[i]);
+		for (int i = 0; i < y; i++)
+			horVec[y - 1 - i].erase(horVec[y - 1 - i].begin() + path[i]);
 		verAttempts++;
 		x--;
 	}
@@ -249,46 +251,75 @@ int main(int argc, char* argv[])
 				horVec[j][i] = getHorizontalSeamEnergy(energyVec, horVec, i, j);
 		//find the path of the minimum seam
 		path = findHorizontalPath(horVec);
+		std::reverse(path.begin(), path.end());
+
+		//output bullshit
+				/*std::cout << "\n----\n";
+					for (int i = 0; i < y; i++) {
+						for (int j = 0; j < x; j++)
+							std::cout << pgmVec[i][j] << " ";
+						std::cout << "\n\n";
+					}
+					std::cout << "----\n";
+					for (int i = 0; i < y; i++) {
+						for (int j = 0; j < x; j++)
+							std::cout << energyVec[i][j] << " ";
+						std::cout << "\n\n";
+					}
+					std::cout << "----\n";
+					for (int i = 0; i < y; i++) {
+						for (int j = 0; j < x; j++)
+							std::cout << horVec[i][j] << " ";
+						std::cout << "\n\n";
+					}
+					std::cout << "----\n";
+					for (int i = 0; i < x; i++) {
+						std::cout << path[i] << " ";
+					}*/
+					////////////////////////////////////////////////
+
+
+
 		//delete the seam
 		for (int i = 0; i < x; i++) {
-			for (int j = path[i]; j < y; j++) {
-				if (j == y - 1) {
+			for (int j = path[i]; j < y - 1; j++) {
+				/*if (j == y - 1) {
 					pgmVec[j].erase(pgmVec[j].begin());
 				}
 				else if (j == y - 2) {
-					pgmVec[j][i] = pgmVec[y - 1][0];
+					pgmVec[j][i] = pgmVec[y - 1][i];
 				}
-				else {
+				else {*/
 					pgmVec[j][i] = pgmVec[j + 1][i];
-				}			
+				//}			
 			}
 		}
 		pgmVec.erase(pgmVec.begin() + y - 1);
 		for (int i = 0; i < x; i++) {
-			for (int j = path[i]; j < y; j++) {
-				if (j == y - 1) {
+			for (int j = path[i]; j < y - 1; j++) {
+				/*if (j == y - 1) {
 					energyVec[j].erase(energyVec[j].begin());
 				}
 				else if (j == y - 2) {
 					energyVec[j][i] = energyVec[y - 1][0];
 				}
-				else {
+				else {*/
 					energyVec[j][i] = energyVec[j + 1][i];
-				}
+				//}
 			}
 		}
 		energyVec.erase(energyVec.begin() + y - 1);
 		for (int i = 0; i < x; i++) {
-			for (int j = path[i]; j < y; j++) {
-				if (j == y - 1) {
+			for (int j = path[i]; j < y - 1; j++) {
+				/*if (j == y - 1) {
 					horVec[j].erase(horVec[j].begin());
 				}
 				else if (j == y - 2) {
 					horVec[j][i] = horVec[y - 1][0];
 				}
-				else {
+				else {*/
 					horVec[j][i] = horVec[j + 1][i];
-				}
+				//}
 			}
 		}
 		horVec.erase(horVec.begin() + y - 1);
