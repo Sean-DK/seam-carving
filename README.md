@@ -1,3 +1,3 @@
 # Seam Carving
 
-I forget why I uploaded this project to my personal account, but I won't delete it just in case. Will not be updating it though.
+I'm going to revisit this project in the coming months, possibly during winter break. I plan to use the seam carving algorithm that I've already implemented in order to create an ASCII art generator.
